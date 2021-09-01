@@ -30,6 +30,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  List<Location> _locations = [];
+  List<Location> _locationForDisplay = [];
+
   Future<List<Location>> _getLocations() async {
     var data = await http.get(
         Uri.parse("https://www.metaweather.com/api/location/search/?query=ba"));
@@ -48,39 +51,75 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
+  void initState() {
+    _getLocations().then((value) {
+      setState(() {
+        _locations.addAll(value);
+        _locationForDisplay = _locations;
+      });
+    });
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
       body: Container(
-          child: FutureBuilder(
-        future: _getLocations(),
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
-          if (snapshot.data == null) {
-            return Container(
-              child: Center(
-                child: Text("Loading"),
-              ),
-            );
-          } else {
-            return ListView.builder(
-                itemCount: snapshot.data.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return ListTile(
-                    title: Text(snapshot.data[index].title),
-                    subtitle: Text("LattLong: "+snapshot.data[index].lattLong),
-                  );
-                });
-          }
+          width: MediaQuery.of(context).size.width,
+          child: Center(
+            child: ListView.builder(
+              itemBuilder: (BuildContext context, int index) {
+                return index == 0 ? _searchBar() : _listItem(index - 1);
+              },
+              itemCount: _locationForDisplay.length + 1,
+            ),
+          )),
+    );
+  }
+
+  _searchBar() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextField(
+        decoration: InputDecoration(hintText: 'Search Location'),
+        onChanged: (text) {
+          text = text.toLowerCase();
+          setState(() {
+            _locationForDisplay = _locations.where((location) {
+              var title = location.title!.toLowerCase();
+              return title.contains(text);
+            }).toList();
+          });
         },
-      )),
+      ),
+    );
+  }
+
+  _listItem(index) {
+    return Card(
+      child: ListTile(
+        title: Text(
+          _locationForDisplay[index].title.toString(),
+        ),
+        subtitle: Text(
+          _locationForDisplay[index].lattLong.toString(),
+        ),
+      ),
     );
   }
 }
 
 class Location {
-  final String title, lattLong;
+  String? title;
+  String? lattLong;
 
   Location(this.title, this.lattLong);
+
+  Location.fromJson(Map<String, dynamic> json) {
+    title = json['title'];
+    lattLong = json['lattLong'];
+  }
 }
