@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_assignment/screens/navigation_drawer.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -63,57 +64,37 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      drawer: Drawer(
-        child: Column(
-          children: [
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(20),
-              color: Theme.of(context).primaryColor,
-              child: Center(
-                child: Column(
-                  children: [
-                    Container(
-                      width: 100,
-                      margin: EdgeInsets.only(top: 30),
-                      height: 100,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        image: DecorationImage(
-                            image: NetworkImage(
-                              'https://avatars.githubusercontent.com/u/67167843?s=400&u=30fdbce294cab1615d1f10ad7ea1e00aca50c50b&v=4',
-                            ),
-                            fit: BoxFit.fill),
-                      ),
-                    ),
-                    Text(
-                      'Imasha Senarath',
-                      style: TextStyle(
-                        fontSize: 22,
-                        color: Colors.white,
-                      ),
-                    )
-                  ],
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              tabs: [
+                Tab(icon: Icon(Icons.home)),
+                Tab(icon: Icon(Icons.notifications)),
+                Tab(icon: Icon(Icons.person)),
+              ],
+            ),
+            title: Text(widget.title),
+          ),
+          drawer: NavigationDrawer(),
+          body: TabBarView(
+            children: [
+              Container(
+                width: MediaQuery.of(context).size.width,
+                child: Center(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(20.0),
+                    itemBuilder: (BuildContext context, int index) {
+                      return index == 0 ? _searchBar() : _listItem(index - 1);
+                    },
+                    itemCount: _locationForDisplay.length + 1,
+                  ),
                 ),
               ),
-            )
-          ],
-        ),
-      ),
-      body: Container(
-          width: MediaQuery.of(context).size.width,
-          child: Center(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(20.0),
-              itemBuilder: (BuildContext context, int index) {
-                return index == 0 ? _searchBar() : _listItem(index - 1);
-              },
-              itemCount: _locationForDisplay.length + 1,
-            ),
+              Text("Notification"),
+              Text("Profile")
+            ],
           )),
     );
   }
