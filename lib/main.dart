@@ -1,9 +1,13 @@
+// @dart=2.9
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_assignment/screens/navigation_drawer.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 
 void main() {
   runApp(MyApp());
@@ -23,7 +27,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
+  MyHomePage({Key key, this.title}) : super(key: key);
 
   final String title;
 
@@ -32,6 +36,33 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  File pickedImage;
+  bool isImageLoaded = false;
+
+  Future pickImage() async {
+    var tempStore = await ImagePicker().pickImage(source: ImageSource.gallery);
+    File x = File(tempStore.path);
+
+    setState(() {
+      pickedImage = x;
+      isImageLoaded = true;
+    });
+  }
+
+  Future readText() async {
+    FirebaseVisionImage ourImage = FirebaseVisionImage.fromFile(pickedImage);
+    TextRecognizer recognizeText = FirebaseVision.instance.textRecognizer();
+    VisionText readText = await recognizeText.processImage(ourImage);
+
+    for (TextBlock block in readText.blocks) {
+      for (TextLine line in block.lines) {
+        for (TextElement word in line.elements) {
+          print(word.text);
+        }
+      }
+    }
+  }
+
   List<Location> _locations = [];
   List<Location> _locationForDisplay = [];
 
@@ -68,41 +99,73 @@ class _MyHomePageState extends State<MyHomePage> {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-          appBar: AppBar(
-            bottom: TabBar(
-              tabs: [
-                Tab(icon: Icon(Icons.home)),
-                Tab(icon: Icon(Icons.image)),
-                Tab(icon: Icon(Icons.camera)),
-              ],
-            ),
-            title: Text(widget.title),
-          ),
-          drawer: NavigationDrawer(),
-          body: TabBarView(
-            children: [
-              Container(
-                width: MediaQuery.of(context).size.width,
-                child: Center(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(20.0),
-                    itemBuilder: (BuildContext context, int index) {
-                      return index == 0 ? _searchBar() : _listItem(index - 1);
-                    },
-                    itemCount: _locationForDisplay.length + 1,
-                  ),
-                ),
-              ),
-              Center(
-                child: CachedNetworkImage(
-                  placeholder: (context, url) =>
-                      const CircularProgressIndicator(),
-                  imageUrl: 'https://picsum.photos/250?image=9',
-                ),
-              ),
-              Text("Scan")
+        appBar: AppBar(
+          bottom: TabBar(
+            tabs: [
+              Tab(icon: Icon(Icons.home)),
+              Tab(icon: Icon(Icons.image)),
+              Tab(icon: Icon(Icons.camera)),
             ],
-          )),
+          ),
+          title: Text(widget.title),
+        ),
+        drawer: NavigationDrawer(),
+        body: TabBarView(
+          children: [
+            Container(
+              width: MediaQuery.of(context).size.width,
+              child: Center(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(20.0),
+                  itemBuilder: (BuildContext context, int index) {
+                    return index == 0 ? _searchBar() : _listItem(index - 1);
+                  },
+                  itemCount: _locationForDisplay.length + 1,
+                ),
+              ),
+            ),
+            Center(
+              child: CachedNetworkImage(
+                placeholder: (context, url) =>
+                    const CircularProgressIndicator(),
+                imageUrl: 'https://picsum.photos/250?image=9',
+              ),
+            ),
+            Column(
+              children: <Widget>[
+                SizedBox(height: 100.0),
+                isImageLoaded
+                    ? Center(
+                        child: Container(
+                          height: 200.0,
+                          width: 200.0,
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                                image: FileImage(pickedImage),
+                                fit: BoxFit.cover),
+                          ),
+                        ),
+                      )
+                    : Container(),
+                SizedBox(height: 10.0),
+                ElevatedButton(
+                  child: Text('Pick an image'),
+                  onPressed: () {
+                    pickImage();
+                  },
+                ),
+                SizedBox(height: 10.0),
+                ElevatedButton(
+                  child: Text('Read Text'),
+                  onPressed: () {
+                    readText();
+                  },
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
     );
   }
 
@@ -115,7 +178,7 @@ class _MyHomePageState extends State<MyHomePage> {
           text = text.toLowerCase();
           setState(() {
             _locationForDisplay = _locations.where((location) {
-              var title = location.title!.toLowerCase();
+              var title = location.title.toLowerCase();
               return title.contains(text);
             }).toList();
           });
@@ -152,8 +215,8 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class Location {
-  String? title;
-  String? lattLong;
+  String title;
+  String lattLong;
 
   Location(this.title, this.lattLong);
 

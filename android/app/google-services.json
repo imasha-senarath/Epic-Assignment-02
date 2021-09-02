@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "722358290766",
+    "project_id": "epic-assignment-01",
+    "storage_bucket": "epic-assignment-01.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:722358290766:android:cbd354883d80b0260a761f",
+        "android_client_info": {
+          "package_name": "com.example.epicassignment"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "722358290766-1o04auotk579re3tjmdrosnu31gq18h9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXqHgSE3jpx1QV_dL3PYZTDmFCuJVYssI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "722358290766-1o04auotk579re3tjmdrosnu31gq18h9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:722358290766:android:a21839335232c1b00a761f",
+        "android_client_info": {
+          "package_name": "com.example.flutter_assignment"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "722358290766-1o04auotk579re3tjmdrosnu31gq18h9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXqHgSE3jpx1QV_dL3PYZTDmFCuJVYssI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "722358290766-1o04auotk579re3tjmdrosnu31gq18h9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
