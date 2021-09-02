@@ -3,6 +3,7 @@ import 'package:flutter_assignment/screens/navigation_drawer.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:cached_network_image/cached_network_image.dart';
 
 void main() {
   runApp(MyApp());
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Home'),
+      home: MyHomePage(title: 'Epic'),
     );
   }
 }
@@ -71,8 +72,8 @@ class _MyHomePageState extends State<MyHomePage> {
             bottom: TabBar(
               tabs: [
                 Tab(icon: Icon(Icons.home)),
-                Tab(icon: Icon(Icons.notifications)),
-                Tab(icon: Icon(Icons.person)),
+                Tab(icon: Icon(Icons.image)),
+                Tab(icon: Icon(Icons.camera)),
               ],
             ),
             title: Text(widget.title),
@@ -92,8 +93,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
               ),
-              Text("Notification"),
-              Text("Profile")
+              Center(
+                child: CachedNetworkImage(
+                  placeholder: (context, url) =>
+                      const CircularProgressIndicator(),
+                  imageUrl: 'https://picsum.photos/250?image=9',
+                ),
+              ),
+              Text("Scan")
             ],
           )),
     );
@@ -119,15 +126,28 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _listItem(index) {
     return Card(
-      child: ListTile(
-        title: Text(
-          _locationForDisplay[index].title.toString(),
-        ),
-        subtitle: Text(
-          _locationForDisplay[index].lattLong.toString(),
-        ),
+        child: Padding(
+      padding: EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Padding(
+            padding: EdgeInsets.only(right: 10),
+            child: Icon(Icons.place),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _locationForDisplay[index].title.toString(),
+              ),
+              Text(
+                _locationForDisplay[index].lattLong.toString(),
+              ),
+            ],
+          ),
+        ],
       ),
-    );
+    ));
   }
 }
 
