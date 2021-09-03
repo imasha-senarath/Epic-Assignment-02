@@ -38,8 +38,10 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   File pickedImage;
   bool isImageLoaded = false;
+  String text = "";
 
   Future pickImage() async {
+    text = "";
     var tempStore = await ImagePicker().pickImage(source: ImageSource.gallery);
     File x = File(tempStore.path);
 
@@ -57,7 +59,9 @@ class _MyHomePageState extends State<MyHomePage> {
     for (TextBlock block in readText.blocks) {
       for (TextLine line in block.lines) {
         for (TextElement word in line.elements) {
-          print(word.text);
+          setState(() {
+            text = text + " " + word.text;
+          });
         }
       }
     }
@@ -161,6 +165,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     readText();
                   },
                 ),
+                SizedBox(height: 10.0),
+                Padding(
+                  padding: EdgeInsets.all(10),
+                  child: Text(text),
+                )
               ],
             )
           ],
