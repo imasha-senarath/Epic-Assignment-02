@@ -9,6 +9,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 
+import 'package:provider/provider.dart';
+import 'data/database.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'widget/new_task_input_widget.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -16,13 +21,15 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Epic'),
-    );
+    return Provider(
+        create: (_) => AppDatabase(),
+        child: MaterialApp(
+          title: 'Flutter Demo',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          home: MyHomePage(title: 'Epic'),
+        ));
   }
 }
 
@@ -101,7 +108,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           bottom: TabBar(
@@ -109,6 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
               Tab(icon: Icon(Icons.home)),
               Tab(icon: Icon(Icons.image)),
               Tab(icon: Icon(Icons.camera)),
+              Tab(icon: Icon(Icons.settings)),
             ],
           ),
           title: Text(widget.title),
@@ -171,9 +179,56 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Text(text),
                 )
               ],
-            )
+            ),
+            Column(
+              children: <Widget>[
+                Expanded(child: _buildTaskList(context)),
+                NewTaskInput(),
+              ],
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  StreamBuilder<List<Task>> _buildTaskList(BuildContext context) {
+    final database = Provider.of<AppDatabase>(context);
+    return StreamBuilder(
+      stream: database.watchAllTasks(),
+      builder: (context, AsyncSnapshot<List<Task>> snapshot) {
+        // ignore: deprecated_member_use
+        final tasks = snapshot.data ?? List();
+
+        return ListView.builder(
+          itemCount: tasks.length,
+          itemBuilder: (_, index) {
+            final itemTask = tasks[index];
+            return _buildListItem(itemTask, database);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildListItem(Task itemTask, AppDatabase database) {
+    return Slidable(
+      actionPane: SlidableDrawerActionPane(),
+      secondaryActions: <Widget>[
+        IconSlideAction(
+          caption: 'Delete',
+          color: Colors.red,
+          icon: Icons.delete,
+          onTap: () => database.deleteTask(itemTask),
+        )
+      ],
+      child: CheckboxListTile(
+        title: Text(itemTask.name),
+        subtitle: Text(itemTask.dueDate?.toString() ?? 'No date'),
+        value: itemTask.completed,
+        onChanged: (newValue) {
+          database.updateTask(itemTask.copyWith(completed: newValue));
+        },
       ),
     );
   }
